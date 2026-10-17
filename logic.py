@@ -37,6 +37,49 @@ class DB_Manager:
             conn.commit()
         print("Veri tabanı başarıyla oluşturuldu.")
 
+
+
+        #ÖDEV#
+
+
+        def update_project_status(self, user_id, project_name, status_name):
+    status_id = self.get_status_id(status_name)
+
+    if status_id is None:
+        return False
+
+    sql = '''
+        UPDATE projects
+        SET status_id = ?
+        WHERE project_name = ? AND user_id = ?
+    '''
+
+    self.__executemany(
+        sql,
+        [(status_id, project_name, user_id)]
+    )
+
+    return True
+
+
+
+
+        def add_status(self, status_name):
+    sql = 'INSERT OR IGNORE INTO status (status_name) VALUES (?)'
+    self.__executemany(sql, [(status_name,)])
+
+        
+        def add_skill(self, skill_name):
+    sql = 'INSERT OR IGNORE INTO skills (skill_name) VALUES (?)'
+    self.__executemany(sql, [(skill_name,)])
+
+
+
+        
+
+
+
+
     def __executemany(self, sql, data):
         conn = sqlite3.connect(self.database)
         with conn:
@@ -117,12 +160,31 @@ WHERE project_name=? AND user_id=?
         sql = "DELETE FROM projects WHERE user_id = ? AND project_id = ? "
         self.__executemany(sql, [(user_id, project_id)])
 
+
+
+        #ÖDEV#
+
     def delete_skill(self, project_id, skill_id):
-        sql = "DELETE FROM skills WHERE skill_id = ? AND project_id = ? "
-        self.__executemany(sql, [(skill_id, project_id)])
+    sql = '''
+        DELETE FROM project_skills
+        WHERE project_id = ? AND skill_id = ?
+    '''
+
+    self.__executemany(sql, [(project_id, skill_id)])
+
+    #finish
 
 
 if __name__ == '__main__':
     manager = DB_Manager(DATABASE)
     manager.create_tables()
     manager.default_insert()
+
+
+
+
+#ödev
+    manager.add_status("Planlama")
+    manager.update_project_status(123, "discord bot", "tamamlandı")
+    manager.delete_skill(1, 2)
+    manager.add_skill("Python")
